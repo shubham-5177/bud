@@ -1110,98 +1110,90 @@
             }
 
             // Authentication Methods
-            checkAuthState() {
-                const user = localStorage.getItem('budgetTrackerUser');
-                if (user) {
-                    this.currentUser = JSON.parse(user);
-                    this.showApp();
-                } else {
-                    this.showAuth();
-                }
-            }
+            <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
+  import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-            handleLogin(e) {
-                e.preventDefault();
-                const email = document.getElementById('loginEmail').value;
-                const password = document.getElementById('loginPassword').value;
+  // Your Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDhChElLKrGpgmv1Ej7eEX0_hmF4FyECQM",
+    authDomain: "budget-tracker-87d3e.firebaseapp.com",
+    projectId: "budget-tracker-87d3e",
+    storageBucket: "budget-tracker-87d3e.firebasestorage.app",
+    messagingSenderId: "238041972268",
+    appId: "1:238041972268:web:a24a7797aa9115b0009b89",
+    measurementId: "G-MWPKB4CXE6"
+  };
 
-                // Simple demo authentication
-                if (email && password) {
-                    const user = {
-                        id: Date.now(),
-                        name: email.split('@')[0],
-                        email: email,
-                        premium: true
-                    };
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
 
-                    this.currentUser = user;
-                    localStorage.setItem('budgetTrackerUser', JSON.stringify(user));
-                    this.showNotification('Login successful!', 'success');
-                    this.showApp();
-                } else {
-                    this.showNotification('Please fill in all fields', 'error');
-                }
-            }
+  // ----- Authentication State -----
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      document.getElementById('authSection').style.display = 'none';
+      document.getElementById('appContainer').style.display = 'block';
+      document.getElementById('userName').innerText = user.email;
+      document.getElementById('pageTitle').innerText = `Welcome back, ${user.email}`;
+    } else {
+      document.getElementById('authSection').style.display = 'flex';
+      document.getElementById('appContainer').style.display = 'none';
+    }
+  });
 
-            handleSignup(e) {
-                e.preventDefault();
-                const name = document.getElementById('signupName').value;
-                const email = document.getElementById('signupEmail').value;
-                const password = document.getElementById('signupPassword').value;
+  // ----- Signup -----
+  document.getElementById('signupForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      alert('Signup successful! Please log in.');
+      document.getElementById('showLogin').click();
+    } catch (error) {
+      alert('Signup error: ' + error.message);
+    }
+  });
 
-                if (name && email && password) {
-                    const user = {
-                        id: Date.now(),
-                        name: name,
-                        email: email,
-                        premium: false
-                    };
+  // ----- Login -----
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      // Auth state change handles UI
+    } catch (error) {
+      alert('Login error: ' + error.message);
+    }
+  });
 
-                    this.currentUser = user;
-                    localStorage.setItem('budgetTrackerUser', JSON.stringify(user));
-                    this.showNotification('Account created successfully!', 'success');
-                    this.showApp();
-                } else {
-                    this.showNotification('Please fill in all fields', 'error');
-                }
-            }
+  // ----- Logout -----
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await signOut(auth);
+  });
 
-            handleLogout() {
-                localStorage.removeItem('budgetTrackerUser');
-                this.currentUser = null;
-                this.showAuth();
-                this.showNotification('Logged out successfully', 'success');
-            }
+  // ----- Show/Hide Forms -----
+  document.getElementById('showSignup').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('loginForm').classList.add('hidden');
+    document.getElementById('signupForm').classList.remove('hidden');
+  });
+  document.getElementById('showLogin').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('signupForm').classList.add('hidden');
+    document.getElementById('loginForm').classList.remove('hidden');
+  });
 
-            showSignupForm(e) {
-                e.preventDefault();
-                document.getElementById('loginForm').classList.add('hidden');
-                document.getElementById('signupForm').classList.remove('hidden');
-            }
-
-            showLoginForm(e) {
-                e.preventDefault();
-                document.getElementById('signupForm').classList.add('hidden');
-                document.getElementById('loginForm').classList.remove('hidden');
-            }
-
-            showAuth() {
-                document.getElementById('authSection').style.display = 'flex';
-                document.getElementById('appContainer').style.display = 'none';
-            }
-
-            showApp() {
-                document.getElementById('authSection').style.display = 'none';
-                document.getElementById('appContainer').style.display = 'block';
-
-                if (this.currentUser) {
-                    document.getElementById('userName').textContent = this.currentUser.name;
-                    document.getElementById('pageTitle').textContent = `Welcome back, ${this.currentUser.name}`;
-                }
-
-                this.initializeCharts();
-                this.updateDashboard();
-            }
 
             // UI Methods
             toggleSidebar() {
