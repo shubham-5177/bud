@@ -1619,6 +1619,90 @@
             }
         });
     </script>
+    <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
+  import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+  // Your Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDhChElLKrGpgmv1Ej7eEX0_hmF4FyECQM",
+    authDomain: "budget-tracker-87d3e.firebaseapp.com",
+    projectId: "budget-tracker-87d3e",
+    storageBucket: "budget-tracker-87d3e.firebasestorage.app",
+    messagingSenderId: "238041972268",
+    appId: "1:238041972268:web:a24a7797aa9115b0009b89",
+    measurementId: "G-MWPKB4CXE6"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+
+  // ----- Authentication State -----
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      document.getElementById('authSection').style.display = 'none';
+      document.getElementById('appContainer').style.display = 'block';
+      document.getElementById('userName').innerText = user.email;
+      document.getElementById('pageTitle').innerText = `Welcome back, ${user.email}`;
+    } else {
+      document.getElementById('authSection').style.display = 'flex';
+      document.getElementById('appContainer').style.display = 'none';
+    }
+  });
+
+  // ----- Signup -----
+  document.getElementById('signupForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      alert('Signup successful! Please log in.');
+      document.getElementById('showLogin').click();
+    } catch (error) {
+      alert('Signup error: ' + error.message);
+    }
+  });
+
+  // ----- Login -----
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      // Auth state change handles UI
+    } catch (error) {
+      alert('Login error: ' + error.message);
+    }
+  });
+
+  // ----- Logout -----
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await signOut(auth);
+  });
+
+  // ----- Show/Hide Forms -----
+  document.getElementById('showSignup').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('loginForm').classList.add('hidden');
+    document.getElementById('signupForm').classList.remove('hidden');
+  });
+  document.getElementById('showLogin').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('signupForm').classList.add('hidden');
+    document.getElementById('loginForm').classList.remove('hidden');
+  });
+</script>
 </body>
 
 </html>
