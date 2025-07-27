@@ -567,22 +567,85 @@
         
         @media (max-width: 768px) {
             .sidebar {
-                width: 100%;
+                width: 80vw;
+                max-width: 320px;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                z-index: 2001;
+                position: fixed;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0 !important;
+                padding: 0.5rem;
             }
             .main-content.shifted {
-                margin-left: 0;
+                margin-left: 0 !important;
             }
             .charts-grid {
                 grid-template-columns: 1fr;
+                gap: 1rem;
             }
             .stats-grid {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                grid-template-columns: 1fr;
+                gap: 1rem;
             }
             .form-row {
                 grid-template-columns: 1fr;
             }
             .header {
+                padding: 0.75rem 0.5rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            .header-left h2 {
+                font-size: 1.1rem;
+            }
+            .auth-card {
                 padding: 1rem;
+                max-width: 100vw;
+            }
+            .modal-content {
+                padding: 1rem;
+                max-width: 98vw;
+            }
+            .transaction-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+                padding: 0.75rem 0.5rem;
+            }
+            .transaction-icon {
+                margin-bottom: 0.5rem;
+                margin-right: 0;
+            }
+            .btn, .btn-full {
+                font-size: 1rem;
+                padding: 0.75rem 1rem;
+            }
+            .form-input {
+                font-size: 1rem;
+                padding: 0.6rem;
+            }
+            .stat-value {
+                font-size: 1.3rem;
+            }
+            .stat-header {
+                flex-direction: row;
+                gap: 0.5rem;
+            }
+            .chart-title, .section-title {
+                font-size: 1rem;
+            }
+            .modal-title {
+                font-size: 1.1rem;
             }
         }
         /* Utility Classes */
@@ -1068,16 +1131,16 @@
             init() {
                 this.setupEventListeners();
                 this.loadDemoData();
-                this.checkAuthState();
+                this.checkAuthState && this.checkAuthState();
             }
 
             setupEventListeners() {
                 // Authentication
-                document.getElementById('loginForm').addEventListener('submit', (e) => this.handleLogin(e));
-                document.getElementById('signupForm').addEventListener('submit', (e) => this.handleSignup(e));
-                document.getElementById('showSignup').addEventListener('click', (e) => this.showSignupForm(e));
-                document.getElementById('showLogin').addEventListener('click', (e) => this.showLoginForm(e));
-                document.getElementById('logoutBtn').addEventListener('click', () => this.handleLogout());
+                document.getElementById('loginForm').addEventListener('submit', (e) => this.handleLogin && this.handleLogin(e));
+                document.getElementById('signupForm').addEventListener('submit', (e) => this.handleSignup && this.handleSignup(e));
+                document.getElementById('showSignup').addEventListener('click', (e) => this.showSignupForm && this.showSignupForm(e));
+                document.getElementById('showLogin').addEventListener('click', (e) => this.showLoginForm && this.showLoginForm(e));
+                document.getElementById('logoutBtn').addEventListener('click', () => this.handleLogout && this.handleLogout());
 
                 // Navigation
                 document.getElementById('menuToggle').addEventListener('click', () => this.toggleSidebar());
@@ -1110,91 +1173,6 @@
             }
 
             // Authentication Methods
-            <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-analytics.js";
-  import {
-    getAuth,
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    signOut,
-    onAuthStateChanged
-  } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
-  // Your Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyDhChElLKrGpgmv1Ej7eEX0_hmF4FyECQM",
-    authDomain: "budget-tracker-87d3e.firebaseapp.com",
-    projectId: "budget-tracker-87d3e",
-    storageBucket: "budget-tracker-87d3e.firebasestorage.app",
-    messagingSenderId: "238041972268",
-    appId: "1:238041972268:web:a24a7797aa9115b0009b89",
-    measurementId: "G-MWPKB4CXE6"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  const auth = getAuth(app);
-
-  // ----- Authentication State -----
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      document.getElementById('authSection').style.display = 'none';
-      document.getElementById('appContainer').style.display = 'block';
-      document.getElementById('userName').innerText = user.email;
-      document.getElementById('pageTitle').innerText = `Welcome back, ${user.email}`;
-    } else {
-      document.getElementById('authSection').style.display = 'flex';
-      document.getElementById('appContainer').style.display = 'none';
-    }
-  });
-
-  // ----- Signup -----
-  document.getElementById('signupForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('signupEmail').value;
-    const password = document.getElementById('signupPassword').value;
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      alert('Signup successful! Please log in.');
-      document.getElementById('showLogin').click();
-    } catch (error) {
-      alert('Signup error: ' + error.message);
-    }
-  });
-
-  // ----- Login -----
-  document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // Auth state change handles UI
-    } catch (error) {
-      alert('Login error: ' + error.message);
-    }
-  });
-
-  // ----- Logout -----
-  document.getElementById('logoutBtn').addEventListener('click', async () => {
-    await signOut(auth);
-  });
-
-  // ----- Show/Hide Forms -----
-  document.getElementById('showSignup').addEventListener('click', (e) => {
-    e.preventDefault();
-    document.getElementById('loginForm').classList.add('hidden');
-    document.getElementById('signupForm').classList.remove('hidden');
-  });
-  document.getElementById('showLogin').addEventListener('click', (e) => {
-    e.preventDefault();
-    document.getElementById('signupForm').classList.add('hidden');
-    document.getElementById('loginForm').classList.remove('hidden');
-  });
-
-
             // UI Methods
             toggleSidebar() {
                 const sidebar = document.getElementById('sidebar');
@@ -1236,7 +1214,7 @@
 
                 // Update page title
                 const titles = {
-                    dashboard: `Welcome back, ${this.currentUser?.name || 'User'}`,
+                    dashboard: Welcome back, ${this.currentUser?.name || 'User'},
                     transactions: 'Transaction Management',
                     analytics: 'Advanced Analytics',
                     budgets: 'Budget Planning',
@@ -1300,7 +1278,7 @@
                 this.updateDashboard();
                 this.hideTransactionModal();
 
-                this.showNotification(`${type === 'income' ? 'Income' : 'Expense'} added successfully!`, 'success');
+                this.showNotification(${type === 'income' ? 'Income' : 'Expense'} added successfully!, 'success');
             }
 
             // Data Management
@@ -1404,10 +1382,10 @@
                 const totalBalance = totalIncome - totalExpenses;
                 const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome * 100) : 0;
 
-                document.getElementById('totalBalance').textContent = `${totalBalance.toFixed(2)}`;
-                document.getElementById('totalIncome').textContent = `${totalIncome.toFixed(2)}`;
-                document.getElementById('totalExpenses').textContent = `${totalExpenses.toFixed(2)}`;
-                document.getElementById('savingsRate').textContent = `${savingsRate.toFixed(1)}%`;
+                document.getElementById('totalBalance').textContent = ${totalBalance.toFixed(2)};
+                document.getElementById('totalIncome').textContent = ${totalIncome.toFixed(2)};
+                document.getElementById('totalExpenses').textContent = ${totalExpenses.toFixed(2)};
+                document.getElementById('savingsRate').textContent = ${savingsRate.toFixed(1)}%;
             }
 
             updateRecentTransactions() {
@@ -1584,7 +1562,7 @@
             showNotification(message, type = 'info') {
                 const notification = document.getElementById('notification');
                 notification.textContent = message;
-                notification.className = `notification ${type}`;
+                notification.className = notification ${type};
                 notification.classList.add('show');
 
                 setTimeout(() => {
@@ -1644,7 +1622,7 @@
       document.getElementById('authSection').style.display = 'none';
       document.getElementById('appContainer').style.display = 'block';
       document.getElementById('userName').innerText = user.email;
-      document.getElementById('pageTitle').innerText = `Welcome back, ${user.email}`;
+      document.getElementById('pageTitle').innerText = Welcome back, ${user.email};
     } else {
       document.getElementById('authSection').style.display = 'flex';
       document.getElementById('appContainer').style.display = 'none';
